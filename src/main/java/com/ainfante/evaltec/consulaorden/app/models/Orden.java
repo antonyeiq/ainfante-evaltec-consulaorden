@@ -21,6 +21,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Document(collection = "ordenes")
 public class Orden {
+
 	@Id
 	private String id;
 	private String cliente;

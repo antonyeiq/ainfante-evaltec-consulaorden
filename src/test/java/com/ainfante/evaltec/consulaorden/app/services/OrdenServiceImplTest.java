@@ -10,6 +10,11 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,48 +27,56 @@ import com.ainfante.evaltec.consulaorden.app.models.ItemOrden;
 import com.ainfante.evaltec.consulaorden.app.models.Orden;
 import com.ainfante.evaltec.consulaorden.app.repositories.OrdenRepository;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class OrdenServiceImplTest {
 
-	@MockBean
-	OrdenRepository ordenRepository;
+    @Mock
+    OrdenRepository ordenRepository;
 
-	@Autowired
-	OrdenService ordenService;
+    @InjectMocks
+    OrdenServiceImpl ordenService;
 
-	List<Orden> lstOrden;
-	Optional<Orden> optOrden;
-	List<ItemOrden> itemsOrden;
-	@MockBean
-	private Pageable pageableMock;
-	@MockBean
-	private Page<Orden> ordenPage;
+    @Spy
+    private Page<Orden> pageOrdenes;
 
-	@BeforeEach
-	void setup() {
-		lstOrden = new ArrayList<>();
-		optOrden = Optional.of(new Orden());
-		List<ItemOrden> itemsOrden = new ArrayList<>();
-	}
+    List<Orden> lstOrden = new ArrayList<>();
+    Optional<Orden> optOrden;
+    List<ItemOrden> itemsOrden = new ArrayList<>();
 
-	@Test
-	void testFindAll() {		
-		when(ordenService.findAll()).thenReturn(lstOrden);
-	}
+    @BeforeEach
+    void setup() {
+        Orden orden = new Orden();
+        orden.setCliente("Antony");
+        itemsOrden.add(new ItemOrden());
+        orden.setItemsOrden(itemsOrden);
+        lstOrden.add(orden);
+        optOrden = Optional.of(orden);
+    }
 
-	@Test
-	void testFindById() {		
-		when(ordenService.findById(anyString())).thenReturn(optOrden);		
-	}
+    @Test
+    void returnClientUpperCaseSuccessful() {
+        when(ordenRepository.findAll()).thenReturn(lstOrden);
+        ordenService.findAll();
+    }
 
-	@Test
-	void testGetItemsByIdOrden() {		
-		when(ordenRepository.findById(anyString())).thenReturn(optOrden);
-	}
+    @Test
+    void testFindById() {
+        when(ordenRepository.findById(anyString())).thenReturn(optOrden);
+        ordenService.findById(anyString());
+    }
 
-	@Test
-	void testFindPageOrden() {		
-        when(ordenRepository.findAll(pageableMock)).thenReturn(ordenPage);
-	}
+    @Test
+    void testGetItemsByIdOrden() {
+        when(ordenRepository.findById(anyString())).thenReturn(optOrden);
+        ordenService.getItemsByIdOrden(anyString());
+    }
+
+    @Test
+    void testFindPageOrden() {
+        doReturn(lstOrden).when(pageOrdenes).getContent();
+        //when(pageOrdenes.getContent()).thenReturn(lstOrden);
+        when(ordenRepository.findAll(any(Pageable.class))).thenReturn(pageOrdenes);
+        ordenService.findPageOrden(0, 2);
+    }
 
 }

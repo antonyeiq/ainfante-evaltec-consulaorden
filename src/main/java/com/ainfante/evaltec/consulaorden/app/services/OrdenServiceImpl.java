@@ -53,26 +53,17 @@ public class OrdenServiceImpl implements OrdenService {
 
 	@Override
 	public Map<String, Object> findPageOrden(int page, int size) {
-
-		List<Orden> lstOrdenes = new ArrayList<>();
 		Pageable paging = PageRequest.of(page, size);
-
 		Page<Orden> pageOrdenes = ordenRepository.findAll(paging);
-
-		lstOrdenes = pageOrdenes.getContent();
-		
-		lstOrdenes.stream().map(orden -> {
+		List<Orden> lstOrdenes = pageOrdenes.getContent().stream().map(orden -> {
 			orden.setCliente(orden.getCliente().toUpperCase());
 			return orden;
-		});
-
+		}).collect(Collectors.toList());
 		Map<String, Object> response = new HashMap<>();
 		response.put("ordenes", lstOrdenes);
 		response.put("currentPage", pageOrdenes.getNumber());
 		response.put("totalItems", pageOrdenes.getTotalElements());
 		response.put("totalPages", pageOrdenes.getTotalPages());
-
 		return response;
 	}
-
 }
